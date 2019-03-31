@@ -18,7 +18,7 @@ def get_github_user_data(github_username):
 
 
 def get_paginated_data(link):
-    response = requests.get(link)
+    response = requests.get(link, params={'per_page': 100})
     response.raise_for_status()
     if 'next' in response.links:
         next_data = get_paginated_data(response.links['next']['url'])
