@@ -35,8 +35,14 @@ def parse_github_user_data(github_user_data):
 
 
 def parse_github_repo_data(github_repo_data):
-    # total number of public repos (seperate by original repos vs
-    # forked repos) total watcher/follower count
+    '''
+    * total repo count
+    * total original repo count
+    * total forked repo count
+    * total watcher count
+    * total account (repo) size
+    * total stars received
+    '''
     output = defaultdict(int)
     for repo in github_repo_data:
         output['github_total_repo_count'] += 1
@@ -47,6 +53,7 @@ def parse_github_repo_data(github_repo_data):
         # Does not include 'stargazers' or 'subscribers'. REF
         output['github_watcher_count'] += repo['watchers_count']
         output['github_total_repo_size'] += repo['size']
+        output['github_total_stars_received'] += repo['stargazers_count']
     return output
 
 
