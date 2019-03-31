@@ -1,3 +1,5 @@
+from collections  import defaultdict
+
 import requests
 
 
@@ -35,13 +37,7 @@ def parse_github_user_data(github_user_data):
 def parse_github_repo_data(github_repo_data):
     # total number of public repos (seperate by original repos vs
     # forked repos) total watcher/follower count
-    output = {}
-    output['github_total_repo_count'] = 0
-    output['github_original_repo_count'] = 0
-    output['github_forked_repo_count'] = 0
-    output['github_watcher_count'] = 0
-    output['github_follower_count'] = 0
-    output['github_total_repo_size'] = 0
+    output = defaultdict(int)
     for repo in github_repo_data:
         output['github_total_repo_count'] += 1
         if repo['fork'] is True:
