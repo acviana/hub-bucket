@@ -33,6 +33,26 @@ def get_paginated_data(link):
         return response.json()
 
 
+def parse_github_language_data(github_repo_data):
+    '''
+    * Repo languages used
+    '''
+    language_list = [
+        requests.get(item['languages_url']).json()
+        for item in github_repo_data
+    ]
+    language_counter = defaultdict(int)
+    for item in language_list:
+        if item == {}:
+            language_counter['unknown'] += 1
+        else:
+            for key in item:
+                language_counter[key] += 1
+    return {
+        'github_repo_languages': language_counter
+    }
+
+
 def parse_github_repo_data(github_repo_data):
     '''
     * total repo count
@@ -89,9 +109,13 @@ def main(github_username, mode):
         return parsed_github_repo_data
     elif mode == 'starred':
         github_starred_data = get_github_starred_data(github_username)
-        return parsed_github_starred_data = parse_github_starred_data(github_starred_data)
-
+        parsed_github_starred_data = parse_github_starred_data(github_starred_data)
+        return parsed_github_starred_data
+    elif mode == 'languages':
+        github_repo_data = get_github_repo_data(github_username)
+        parsed_github_language_data = parse_github_language_data(github_repo_data)
+        return parsed_github_language_data
 
 if __name__ == '__main__':
-    parsed_github_data = main('kenneth-reitz', mode='starred')
+    parsed_github_data = main('kenneth-reitz', mode='languages')
     print(parsed_github_data)
