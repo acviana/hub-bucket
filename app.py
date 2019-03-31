@@ -9,6 +9,12 @@ def get_github_repo_data(github_username):
     )
 
 
+def get_github_starred_data(github_username):
+    return get_paginated_data(
+        f'https://api.github.com/users/{github_username}/starred'
+        )
+
+
 def get_github_user_data(github_username):
     user_response = requests.get(
         f'https://api.github.com/users/{github_username}'
@@ -25,21 +31,6 @@ def get_paginated_data(link):
         return response.json() + next_data
     else:
         return response.json()
-
-
-def parse_github_user_data(github_user_data):
-    '''
-    * username
-    * url
-    * followers
-    * following
-    '''
-    return {
-        'github_username': github_user_data['login'],
-        'github_user_url': github_user_data['url'],
-        'github_followers': github_user_data['followers'],
-        'github_following': github_user_data['following'],
-    }
 
 
 def parse_github_repo_data(github_repo_data):
@@ -65,6 +56,28 @@ def parse_github_repo_data(github_repo_data):
     return output
 
 
+def parse_github_starred_data(github_starred_data):
+    '''
+    * totals stars given
+    '''
+    return {'github_stars_given': len(github_starred_data)}
+
+
+def parse_github_user_data(github_user_data):
+    '''
+    * username
+    * url
+    * followers
+    * following
+    '''
+    return {
+        'github_username': github_user_data['login'],
+        'github_user_url': github_user_data['url'],
+        'github_followers': github_user_data['followers'],
+        'github_following': github_user_data['following'],
+    }
+
+
 def main(github_username, mode):
     if mode == 'user':
         github_user_data = get_github_user_data(github_username)
@@ -74,8 +87,11 @@ def main(github_username, mode):
         github_repo_data = get_github_repo_data(github_username)
         parsed_github_repo_data = parse_github_repo_data(github_repo_data)
         return parsed_github_repo_data
+    elif mode == 'starred':
+        github_starred_data = get_github_starred_data(github_username)
+        return parsed_github_starred_data = parse_github_starred_data(github_starred_data)
 
 
 if __name__ == '__main__':
-    parsed_github_data = main('kenneth-reitz', mode='user')
+    parsed_github_data = main('kenneth-reitz', mode='starred')
     print(parsed_github_data)
