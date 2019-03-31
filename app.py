@@ -1,6 +1,19 @@
 from collections  import defaultdict
+import os
 
 import requests
+
+
+def wrapped_gitlab_get_request(*args, **kwargs):
+    try:
+        kwargs['auth'] = (
+            os.environ['HUBBUCKET_AUTH_USERNAME'],
+            os.environ['HUBBUCKET_AUTH_TOKEN']
+            # 'derp'
+        )
+    except KeyError:
+        pass
+    return requests.get(*args, **kwargs)
 
 
 def get_github_repo_data(github_username):
@@ -16,7 +29,7 @@ def get_github_starred_data(github_username):
 
 
 def get_github_user_data(github_username):
-    user_response = requests.get(
+    user_response =  wrapped_gitlab_get_request(
         f'https://api.github.com/users/{github_username}'
     )
     user_response.raise_for_status()
@@ -24,7 +37,8 @@ def get_github_user_data(github_username):
 
 
 def get_paginated_data(link):
-    response = requests.get(link, params={'per_page': 100})
+    # response = requests.get(link, params={'per_page': 100})
+    response = wrapped_gitlab_get_request(link, params={'per_page': 100})
     response.raise_for_status()
     if 'next' in response.links:
         next_data = get_paginated_data(response.links['next']['url'])
@@ -38,7 +52,7 @@ def parse_github_language_data(github_repo_data):
     * Repo languages used
     '''
     language_list = [
-        requests.get(item['languages_url']).json()
+        wrapped_gitlab_get_request(item['languages_url']).json()
         for item in github_repo_data
     ]
     language_counter = defaultdict(int)
@@ -115,6 +129,7 @@ def main(github_username, mode):
         github_repo_data = get_github_repo_data(github_username)
         parsed_github_language_data = parse_github_language_data(github_repo_data)
         return parsed_github_language_data
+
 
 if __name__ == '__main__':
     parsed_github_data = main('kenneth-reitz', mode='languages')
