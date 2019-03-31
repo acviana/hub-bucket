@@ -4,6 +4,7 @@ import requests
 def get_github_user_data(github_username):
     resource_url = f'https://api.github.com/users/{github_username}'
     user_response = requests.get(resource_url)
+    user_response.raise_for_status()
     output = user_response.json()
     output['resource_url'] = resource_url
     return output
