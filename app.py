@@ -28,9 +28,17 @@ def get_paginated_data(link):
 
 
 def parse_github_user_data(github_user_data):
+    '''
+    * username
+    * url
+    * followers
+    * following
+    '''
     return {
         'github_username': github_user_data['login'],
-        'github_user_url': github_user_data['url']
+        'github_user_url': github_user_data['url'],
+        'github_followers': github_user_data['followers'],
+        'github_following': github_user_data['following'],
     }
 
 
@@ -69,5 +77,5 @@ def main(github_username, mode):
 
 
 if __name__ == '__main__':
-    parsed_github_data = main('kennethreitz', mode='repo')
+    parsed_github_data = main('kenneth-reitz', mode='user')
     print(parsed_github_data)
