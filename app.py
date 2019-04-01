@@ -53,17 +53,6 @@ def get_github_user_data(github_username):
     return user_response.json()
 
 
-def get_paginated_data(link):
-    # response = requests.get(link, params={'per_page': 100})
-    response = wrapped_gitlab_get_request(link, params={'per_page': 100})
-    response.raise_for_status()
-    if 'next' in response.links:
-        next_data = get_paginated_data(response.links['next']['url'])
-        return response.json() + next_data
-    else:
-        return response.json()
-
-
 def parse_github_language_data(github_repo_data):
     '''
     * Repo languages used
@@ -94,6 +83,7 @@ def parse_github_repo_data(github_repo_data):
     * total stars received
     '''
     output = defaultdict(int)
+    topic_list = []
     for repo in github_repo_data:
         output['github_total_repo_count'] += 1
         if repo['fork'] is True:
@@ -104,6 +94,10 @@ def parse_github_repo_data(github_repo_data):
         output['github_watcher_count'] += repo['watchers_count']
         output['github_total_repo_size'] += repo['size']
         output['github_total_stars_received'] += repo['stargazers_count']
+        topic_list += repo['topics']
+    output = dict(output)
+    output['github_topic_list'] = set(topic_list)
+
     return output
 
 
@@ -149,5 +143,5 @@ def main(github_username, mode):
 
 
 if __name__ == '__main__':
-    parsed_github_data = main('kenneth-reitz', mode='languages')
-    print(parsed_github_data)
+    parsed_github_data = main('kenneth-reitz', mode='repo')
+    import pprint; pprint.pprint(parsed_github_data)
