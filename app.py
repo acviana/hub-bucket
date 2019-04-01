@@ -7,8 +7,26 @@ def main():
     query='''
     {
       user(login: "kenneth-reitz") {
-      totalRepositories: repositories {
-        totalCount
+        totalRepositories: repositories {
+          totalCount
+        }
+        forkedRespositories: repositories(isFork: true) {
+          totalCount
+        }
+        originalRepositories: repositories(isFork: false) {
+          totalCount
+        }
+        followers {
+          totalCount
+        }
+        following {
+          totalCount
+        }
+        starsGiven: starredRepositories {
+          totalCount
+        }
+        issues(states: OPEN) {
+          totalCount
         }
       }
     }
