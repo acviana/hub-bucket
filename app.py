@@ -41,8 +41,18 @@ def main():
     )
     data = query_reponse.json()['data']['user']
     output = {key:data[key]['totalCount'] for (key,value) in data.items()}
-    import pprint; pprint.pprint(output)
+    return output
 
 
 if __name__ == '__main__':
-    main()
+    data = main()
+    expected = {
+        'followers': 26593,
+        'following': 198,
+        'forkedRespositories': 13,
+        'issues': 159,
+        'originalRepositories': 140,
+        'starsGiven': 1924,
+        'totalRepositories': 153
+     }
+    assert data == expected
