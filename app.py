@@ -3,10 +3,10 @@ import os
 import requests
 
 
-def main():
+def main(github_username):
     query='''
-    {
-      user(login: "kenneth-reitz") {
+    query UnpaginatedData($username: String!){
+      user(login: $username) {
         totalRepositories: repositories {
           totalCount
         }
@@ -37,15 +37,18 @@ def main():
             os.environ['HUBBUCKET_AUTH_USERNAME'],
             os.environ['HUBBUCKET_AUTH_TOKEN']
         ),
-        json={'query': query}
+        json={'query': query, 'variables': {'username': github_username}}
     )
-    data = query_reponse.json()['data']['user']
+    data = query_reponse.json()
+    if 'errors' in data:
+        print(data)
+    data=data['data']['user']
     output = {key:data[key]['totalCount'] for (key,value) in data.items()}
     return output
 
 
 if __name__ == '__main__':
-    data = main()
+    data = main('kenneth-reitz')
     expected = {
         'followers': 26593,
         'following': 198,
