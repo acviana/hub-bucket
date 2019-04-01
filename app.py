@@ -5,7 +5,7 @@ import requests
 paginated_query='''
 query NonPaginatedResources($username: String!, $first: Int, $after: String) {
   user(login: $username) {
-    repositories(first: $first, after: $after) {
+    repositories(first: $first, after: $after, ownerAffiliations: [OWNER]) {
       edges {
         node {
           name
@@ -27,13 +27,13 @@ query NonPaginatedResources($username: String!, $first: Int, $after: String) {
 unpaginated_query='''
 query UnpaginatedData($username: String!){
   user(login: $username) {
-    totalRepositories: repositories {
+    totalRepositories: repositories(ownerAffiliations: [OWNER]) {
       totalCount
     }
-    forkedRespositories: repositories(isFork: true) {
+    forkedRespositories: repositories(ownerAffiliations: [OWNER], isFork: true) {
       totalCount
     }
-    originalRepositories: repositories(isFork: false) {
+    originalRepositories: repositories(ownerAffiliations: [OWNER], isFork: false) {
       totalCount
     }
     followers {
@@ -77,14 +77,17 @@ def github_query_runner(query, github_username, first=100, after=None):
 
 def main(github_username):
     unpaginated_data = github_query_runner(unpaginated_query, github_username)
-    output = {key:unpaginated_data[key]['totalCount'] for (key,value) in unpaginated_data.items()}
+    unpaginated_output = {key:unpaginated_data[key]['totalCount'] for (key,value) in unpaginated_data.items()}
 
     paginated_data = github_query_runner(paginated_query, github_username)
+    paginated_output = [
+        item['node']['stargazers']['totalCount']
+        for item in paginated_data['repositories']['edges']
+    ]
+    unpaginated_output['starsReceived'] = (sum(paginated_output))
     if paginated_data['repositories']['pageInfo']['hasNextPage']:
-        print(paginated_data['repositories']['pageInfo']['endCursor'])
-    # import pprint;pprint.pprint(paginated_data)
-
-    return output
+        raise Exception('Need Pagination')
+    return unpaginated_output
 
 
 if __name__ == '__main__':
@@ -92,10 +95,11 @@ if __name__ == '__main__':
     expected = {
         'followers': 26593,
         'following': 198,
-        'forkedRespositories': 13,
+        'forkedRespositories': 8,
         'issues': 159,
-        'originalRepositories': 140,
+        'originalRepositories': 24,
         'starsGiven': 1924,
-        'totalRepositories': 153
+        'totalRepositories': 32,
+        'starsReceived': 1721
      }
-    assert data == expected
+    assert data == expected,  data
