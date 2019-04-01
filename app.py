@@ -3,9 +3,9 @@ import os
 import requests
 
 paginated_query='''
-query NonPaginatedResources($username: String!) {
+query NonPaginatedResources($username: String!, $first: Int, $after: String) {
   user(login: $username) {
-    repositories(first: 100) {
+    repositories(first: $first, after: $after) {
       edges {
         node {
           name
@@ -53,29 +53,36 @@ query UnpaginatedData($username: String!){
 '''
 
 
-def github_query_runner(github_username, query):
+def github_query_runner(query, github_username, first=100, after=None):
     query_reponse = requests.post(
         url='https://api.github.com/graphql',
         auth=(
             os.environ['HUBBUCKET_AUTH_USERNAME'],
             os.environ['HUBBUCKET_AUTH_TOKEN']
         ),
-        json={'query': query, 'variables': {'username': github_username}}
+        json={
+            'query': query,
+            'variables': {
+                'username': github_username,
+                'first': first,
+                'after': after,
+            }
+        }
     )
     data = query_reponse.json()
     if 'errors' in data:
         print(data)
-    return data
+    return data['data']['user']
 
 
 def main(github_username):
-    unpaginated_data = github_query_runner(github_username, unpaginated_query)
-    unpaginated_data=unpaginated_data['data']['user']
+    unpaginated_data = github_query_runner(unpaginated_query, github_username)
     output = {key:unpaginated_data[key]['totalCount'] for (key,value) in unpaginated_data.items()}
 
-    paginated_data = github_query_runner(github_username, paginated_query)
-    paginated_data=paginated_data['data']['user']
-    import pprint;pprint.pprint(paginated_data)
+    paginated_data = github_query_runner(paginated_query, github_username)
+    if paginated_data['repositories']['pageInfo']['hasNextPage']:
+        print(paginated_data['repositories']['pageInfo']['endCursor'])
+    # import pprint;pprint.pprint(paginated_data)
 
     return output
 
