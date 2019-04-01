@@ -139,6 +139,9 @@ def main(github_username):
     )
     unpaginated_output['topics'] = topic_dict
 
+    # TODO: Total size
+    # TODO: Total commits
+
     return unpaginated_output
 
 
