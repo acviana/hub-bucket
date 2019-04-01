@@ -9,21 +9,38 @@ def wrapped_gitlab_get_request(*args, **kwargs):
         kwargs['auth'] = (
             os.environ['HUBBUCKET_AUTH_USERNAME'],
             os.environ['HUBBUCKET_AUTH_TOKEN']
-            # 'derp'
         )
     except KeyError:
         pass
-    return requests.get(*args, **kwargs)
+    return requests.get(
+        *args,
+        headers={'accept': 'application/vnd.github.mercy-preview+json'},
+        **kwargs
+    )
+
+
+def wrapped_gitlab_paginator(link, **kwargs):
+    kwargs['params'] = {'per_page': 100}
+    response = wrapped_gitlab_get_request(link, **kwargs)
+    response.raise_for_status()
+    if 'next' in response.links:
+        next_data = wrapped_gitlab_paginator(
+            response.links['next']['url'], **kwargs
+        )
+        return response.json() + next_data
+    else:
+        return response.json()
 
 
 def get_github_repo_data(github_username):
-    return get_paginated_data(
-        f'https://api.github.com/users/{github_username}/repos'
+    return wrapped_gitlab_paginator(
+        f'https://api.github.com/users/{github_username}/repos',
+        headers={'accept': 'application/vnd.github.mercy-preview+json'}
     )
 
 
 def get_github_starred_data(github_username):
-    return get_paginated_data(
+    return wrapped_gitlab_paginator(
         f'https://api.github.com/users/{github_username}/starred'
         )
 
