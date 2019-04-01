@@ -39,7 +39,9 @@ def main():
         ),
         json={'query': query}
     )
-    print(query_reponse.json())
+    data = query_reponse.json()['data']['user']
+    output = {key:data[key]['totalCount'] for (key,value) in data.items()}
+    import pprint; pprint.pprint(output)
 
 
 if __name__ == '__main__':
