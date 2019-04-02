@@ -32,7 +32,27 @@ Once you have your keys configured you can launch the Flask app in the same shel
 $ flask run
 ```
 
-The following url `http://127.0.0.1:5000/api/v1/user?github_username=kenneth-reitz&bitbucket_username=2`
+If everything is working got to `http://127.0.0.1:5000/api/v1/status` and you should see:
+
+```json
+{
+  "status": "The server is running."
+}
+```
+
+**Querying the API**
+
+THe API exposes one endpoint `api/v1/user` which accepts 3 parameters:
+
+    * `github_username` (required: str): GitHub username to query.
+    * `bitbucket_username` (required: str): Bitbucket username to query.
+    * `github_api_version` (optional: int [default: 4]): Github API version. Must be 3 or 4.
+
+An example valid query would be:
+
+```
+http://127.0.0.1:5000/api/v1/user?github_username=kenneth-reitz&bitbucket_username=2&github_api_version=4
+```
 
 Which should return:
 

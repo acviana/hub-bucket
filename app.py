@@ -20,8 +20,13 @@ def error_response(status_code, message=None):
     return response
 
 
+@app.route("/api/v1/status")
+def api_v1_status():
+    return jsonify({'status': 'The server is running.'})
+
+
 @app.route("/api/v1/user")
-def hello():
+def api_v1_user():
     '''
     Query Parameters:
         github_username (required: str):
