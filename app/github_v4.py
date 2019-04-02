@@ -68,6 +68,17 @@ query UnpaginatedData($username: String!){
 
 
 def github_query_runner(query, github_username, first=100, after=None):
+    '''
+    Wrapper function for the GitHub API v4 GraphQL query.
+
+    Args:
+        query (str): The GraphQL query string.
+        github_username (str): The GitHub user name to query.
+        first (int) [optional | default = 1]: The `first` parameter for
+            pagination. Sets the pagination size.
+        after (str) [optional | default = None]: The `after` parameter
+            for pagination. Sets the pagination cursor potion.
+    '''
     query_reponse = requests.post(
         url='https://api.github.com/graphql',
         auth=(
@@ -90,6 +101,12 @@ def github_query_runner(query, github_username, first=100, after=None):
 
 
 def parse_language_nodes(repository_nodes):
+    '''
+    Parses the GraphQL language nodes for language statistics.
+
+    Args:
+        repository_nodes (list): GrapQL repository nodes.
+    '''
     nested_language_list = [
         item['node']['languages']['nodes']
         for item in repository_nodes
@@ -103,6 +120,12 @@ def parse_language_nodes(repository_nodes):
 
 
 def parse_topic_nodes(repository_nodes):
+    '''
+    Parses the GraphQL repository nodes for topic statistics.
+
+    Args:
+        repository_nodes (list): GrapQL repository nodes.
+    '''
     nested_topic_list = [
         item['node']['repositoryTopics']['nodes']
         for item in repository_nodes
@@ -116,8 +139,30 @@ def parse_topic_nodes(repository_nodes):
 
 
 def github_v4_main(github_username):
+    '''
+    Returns the compiled GitHub v4 statistics.
+
+    This function combines all the `get_*` query function with the
+    `parse_*` data processing functions and finally name spaces the
+    results to match the format returned by our API.
+
+    The following statistics are returned as dictionary keys:
+        followers
+        following
+        forkedRespositories
+        issues
+        originalRepositories
+        starsGiven
+        totalRepositories
+        starsReceived
+        languages
+        topics
+    '''
     unpaginated_data = github_query_runner(unpaginated_query, github_username)
-    unpaginated_output = {key:unpaginated_data[key]['totalCount'] for (key,value) in unpaginated_data.items()}
+    unpaginated_output = {
+        key:unpaginated_data[key]['totalCount']
+        for (key,value) in unpaginated_data.items()
+    }
 
     paginated_data = github_query_runner(paginated_query, github_username)
     if paginated_data['repositories']['pageInfo']['hasNextPage']:

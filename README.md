@@ -111,3 +111,30 @@ Which should return:
   "github_username": "kenneth-reitz"
 }
 ```
+
+**Test**
+
+This project still needs to implement unit and integration tests but the functions were written with testability in mind; separating querying from data processing from the Flask application itself. This should leave it pretty easy to test. In the interest of time the tests would look like this:
+
+```
+tests/
+├── __init__.py
+├── integration
+│   ├── __init__.py
+│   └── test_routes.py
+└── unit
+    ├── __init__.py
+    ├── test_bitbucket.py
+    ├── test_github_v3.py
+    ├── test_github_v4.py
+    └── test_routes.py
+```
+
+For the unit tests we can mock the GitHub / BitBucket API response using small sample fixtures from the real APIs for the querying functions. For the downstream parsing and aggregating functions we can just pass in objects directly. For the Flask route unit tests we can mock the returns from the main functions such as `main_github_v4` and run against `app.test_client()`. In these tests were looking for things like good coverage against things like missing keys, server errors, malformed queries, etc.
+
+In the integration tests we will run from an `app.test_client()` all the way down to mocked GitHub / BitBucket API responses. Here we are making sure we cover all of the main user interactions against our API including incorrect inputs.
+
+These tests could be run with any runner but I like pytest which would be installed as a development package (`$ pipenv install pytest -d`).
+
+For the record, I'm a big proponent of TDD when appropriate, but sometimes, like when you're starting a large project from scratch, you don't know the final structure well enough beforehand to start with a test framework. Instead, I used a script with asserts against the live 3rd party databases to make sure my changes were non-breaking as I worked.
+

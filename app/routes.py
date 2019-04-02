@@ -10,6 +10,13 @@ from app.github_v4 import github_v4_main
 
 
 def error_response(status_code, message=None):
+    '''
+    Wrapper function for generation HTTP errors with JSON messages.
+
+    Args:
+        status_code (int): HTTP status code to raise.
+        message (str): Message to be returned as JSON.
+    '''
     payload = {'error': HTTP_STATUS_CODES.get(status_code, 'Unknown error')}
     if message:
         payload['message'] = message
@@ -20,12 +27,20 @@ def error_response(status_code, message=None):
 
 @app.route("/api/v1/status")
 def api_v1_status():
+    '''
+    Status function you can use to verify that the API server is
+    running.
+    '''
     return jsonify({'status': 'The server is running.'})
 
 
 @app.route("/api/v1/user")
 def api_v1_user():
     '''
+    The is the main endpoint provided by our REST API. It currently
+    only returns GitHub API v3 and v4 data but is set up to be easily
+    expanded to include BitBucket data.
+
     Query Parameters:
         github_username (required: str):
             GitHub username to query.
