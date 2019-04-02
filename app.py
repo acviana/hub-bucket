@@ -5,7 +5,8 @@ from flask import (
 )
 from werkzeug.http import HTTP_STATUS_CODES
 
-from github_v4 import main
+from github_v3 import github_v3_main
+from github_v4 import github_v4_main
 
 app = Flask(__name__)
 
@@ -21,6 +22,15 @@ def error_response(status_code, message=None):
 
 @app.route("/api/v1/user")
 def hello():
+    '''
+    Query Parameters:
+        github_username (required: str):
+            GitHub username to query.
+        bitbucket_username (required: str):
+            Bitbucket username to query.
+        github_api_version (optional: int):
+            Github API version. Must be 3 or 4.
+    '''
     try:
         github_username = request.args['github_username']
         bitbucket_username = request.args['bitbucket_username']
@@ -32,11 +42,23 @@ def hello():
         )
         return error_response(400, message)
 
+    github_api_version = request.args.get('github_api_version', 4)
+    if github_api_version in ['3', '4']:
+        github_api_version = int(github_api_version)
+    else:
+        return error_response(400, 'GitHub API version must be either 3 or 4')
+
+    if github_api_version == 3:
+        github_data = github_v3_main(github_username)
+    elif github_api_version == 4:
+        github_data = github_v4_main(github_username)
+
     return jsonify(
             {
-                'github_data': main(github_username),
+                'github_data': github_data,
                 'github_username': github_username,
                 'bitbucket_username': bitbucket_username,
+                'github_api_version': github_api_version,
             }
         )
 

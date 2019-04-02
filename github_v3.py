@@ -14,7 +14,7 @@ def wrapped_gitlab_get_request(*args, **kwargs):
         pass
     return requests.get(
         *args,
-        headers={'accept': 'application/vnd.github.mercy-preview+json'},
+        # headers={'accept': 'application/vnd.github.mercy-preview+json'},
         **kwargs
     )
 
@@ -60,16 +60,14 @@ def parse_github_language_data(github_repo_data):
     language_list = [
         wrapped_gitlab_get_request(item['languages_url']).json()
         for item in github_repo_data
+        if item != {}
     ]
     language_counter = defaultdict(int)
     for item in language_list:
-        if item == {}:
-            language_counter['unknown'] += 1
-        else:
-            for key in item:
-                language_counter[key] += 1
+        for key in item:
+            language_counter[key] += 1
     return {
-        'github_repo_languages': language_counter
+        'github_repo_languages': dict(language_counter)
     }
 
 
@@ -83,20 +81,20 @@ def parse_github_repo_data(github_repo_data):
     * total stars received
     '''
     output = defaultdict(int)
-    topic_list = []
+    topic_counter = defaultdict(int)
     for repo in github_repo_data:
         output['github_total_repo_count'] += 1
         if repo['fork'] is True:
             output['github_forked_repo_count'] += 1
         else:
             output['github_original_repo_count'] += 1
-        # Does not include 'stargazers' or 'subscribers'. REF
         output['github_watcher_count'] += repo['watchers_count']
         output['github_total_repo_size'] += repo['size']
         output['github_total_stars_received'] += repo['stargazers_count']
-        topic_list += repo['topics']
+        for topic in repo['topics']:
+            topic_counter[topic] += 1
     output = dict(output)
-    output['github_topic_list'] = set(topic_list)
+    output['github_topic_list'] = dict(topic_counter)
 
     return output
 
@@ -123,25 +121,31 @@ def parse_github_user_data(github_user_data):
     }
 
 
-def main(github_username, mode):
-    if mode == 'user':
-        github_user_data = get_github_user_data(github_username)
-        parsed_github_user_data = parse_github_user_data(github_user_data)
-        return parsed_github_user_data
-    elif mode == 'repo':
-        github_repo_data = get_github_repo_data(github_username)
-        parsed_github_repo_data = parse_github_repo_data(github_repo_data)
-        return parsed_github_repo_data
-    elif mode == 'starred':
-        github_starred_data = get_github_starred_data(github_username)
-        parsed_github_starred_data = parse_github_starred_data(github_starred_data)
-        return parsed_github_starred_data
-    elif mode == 'languages':
-        github_repo_data = get_github_repo_data(github_username)
-        parsed_github_language_data = parse_github_language_data(github_repo_data)
-        return parsed_github_language_data
+def github_v3_main(github_username):
+    output = {}
+
+    github_user_data = get_github_user_data(github_username)
+    parsed_github_user_data = parse_github_user_data(github_user_data)
+    output['followers'] = parsed_github_user_data['github_followers']
+    output['following'] = parsed_github_user_data['github_following']
+
+    github_repo_data = get_github_repo_data(github_username)
+    parsed_github_repo_data = parse_github_repo_data(github_repo_data)
+    output['forkedRespositories'] = parsed_github_repo_data['github_forked_repo_count']
+    output['originalRespositories'] = parsed_github_repo_data['github_original_repo_count']
+    output['totalRepositories'] = parsed_github_repo_data['github_total_repo_count']
+    output['topics'] = parsed_github_repo_data['github_topic_list']
+
+    parsed_github_language_data = parse_github_language_data(github_repo_data)
+    output['languages'] = parsed_github_language_data['github_repo_languages']
+
+    github_starred_data = get_github_starred_data(github_username)
+    parsed_github_starred_data = parse_github_starred_data(github_starred_data)
+    output['starsGiven'] = parsed_github_starred_data['github_stars_given']
+
+    return output
 
 
 if __name__ == '__main__':
-    parsed_github_data = main('kenneth-reitz', mode='repo')
+    parsed_github_data = github_v3_main('kenneth-reitz')
     import pprint; pprint.pprint(parsed_github_data)

@@ -115,7 +115,7 @@ def parse_topic_nodes(repository_nodes):
     return dict(topic_dict)
 
 
-def main(github_username):
+def github_v4_main(github_username):
     unpaginated_data = github_query_runner(unpaginated_query, github_username)
     unpaginated_output = {key:unpaginated_data[key]['totalCount'] for (key,value) in unpaginated_data.items()}
 
@@ -146,7 +146,7 @@ def main(github_username):
 
 
 if __name__ == '__main__':
-    data = main('kenneth-reitz')
+    data = github_v4_main('kenneth-reitz')
     expected = {
         'followers': 26593,
         'following': 198,
