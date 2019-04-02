@@ -8,7 +8,10 @@ Make sure you have pipenv and Python 3.6 installed.
 
 ```shell
 $ pipenv install
+$ pipenv shell
 ```
+
+This guide assumes that you remain in the same pipenv shell the entire time you are setting up and running the project.
 
 **GitHub Keys**
 
@@ -26,9 +29,16 @@ $ export HUBBUCKET_AUTH_USERNAME='my-username'
 
 **Running the Service**
 
+If you want to run the service in debug mode (provides a stacktrace in your web browser) run:
+
+```shell
+$ export FLASK_DEBUG=1
+```
+
 Once you have your keys configured you can launch the Flask app in the same shell session by running:
 
 ```shell
+
 $ flask run
 ```
 
@@ -44,9 +54,9 @@ If everything is working got to `http://127.0.0.1:5000/api/v1/status` and you sh
 
 THe API exposes one endpoint `api/v1/user` which accepts 3 parameters:
 
- * `github_username` (required: str): GitHub username to query.
- * `bitbucket_username` (required: str): Bitbucket username to query.
- * `github_api_version` (optional: int [default: 4]): Github API version. Must be 3 or 4.
+ * `github_username` (str): GitHub username to query.
+ * `bitbucket_username` (str): Bitbucket username to query.
+ * `github_api_version` (int) [optional: default=4]): GitHub API version. Must be 3 or 4.
 
 An example valid query would be:
 
