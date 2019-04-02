@@ -21,14 +21,7 @@ $ echo $SHELL
 /bin/bash
 
 $ export HUBBUCKET_AUTH_TOKEN='my-very-secure-value'
-
-$ echo $HUBBUCKET_AUTH_TOKEN
-my-very-secure-value
-
 $ export HUBBUCKET_AUTH_USERNAME='my-username'
-
-$ echo $HUBBUCKET_AUTH_USERNAME
-my-username
 ```
 
 **Running the Service**
@@ -43,6 +36,58 @@ The following url `http://127.0.0.1:5000/api/v1/user?github_username=kenneth-rei
 
 Which should return:
 
-```
-http://127.0.0.1:5000/api/v1/user?github_username=kenneth-reitz&bitbucket_username=2
+```json
+{
+  "bitbucket_username": "2",
+  "github_data": {
+    "followers": 26594,
+    "following": 198,
+    "forkedRespositories": 8,
+    "issues": 159,
+    "languages": {
+      "Batchfile": 1,
+      "CSS": 2,
+      "Dockerfile": 2,
+      "Go": 1,
+      "HTML": 3,
+      "JavaScript": 2,
+      "Makefile": 4,
+      "PHP": 1,
+      "Python": 24,
+      "Ruby": 1,
+      "Shell": 4,
+      "Swift": 1
+    },
+    "originalRepositories": 24,
+    "starsGiven": 1924,
+    "starsReceived": 1721,
+    "topics": {
+      "autopep8": 1,
+      "black": 1,
+      "cdn": 1,
+      "cdnjs": 1,
+      "code": 1,
+      "codeeditor": 1,
+      "codeformatter": 1,
+      "css": 1,
+      "devops": 1,
+      "editor": 1,
+      "gofmt": 1,
+      "homebrew": 1,
+      "html": 1,
+      "html5": 1,
+      "infrastructure-as-code": 1,
+      "ios": 1,
+      "js": 1,
+      "opensource": 1,
+      "pyfmt": 1,
+      "python": 3,
+      "terraform": 1,
+      "texteditor": 1,
+      "yapf": 1
+    },
+    "totalRepositories": 32
+  },
+  "github_username": "kenneth-reitz"
+}
 ```
